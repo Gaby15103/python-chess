@@ -1,13 +1,34 @@
 from chess_engine import ChessEngine
 from cli_manager import CLIManager
-
+import subprocess
 
 def main():
+    subprocess.run(["clear"])
+    # 1. Ask the user for the display mode
+    print("Select View Mode:")
+    print("1. CLI (Terminal)")
+    print("2. 2D (Ursina)")
+    print("3. 3D (Ursina)")
+    choice = input("Enter choice (1/2/3): ").strip()
 
-    engine = ChessEngine()  # This is the "Brain"
+    engine = ChessEngine()
+
+    if choice == "1":
+        run_cli_mode(engine)
+    elif choice == "2":
+        from gui_2d import ChessGui2D  # Create this file for Ursina 2D
+        gui = ChessGui2D(engine, mode='2d')
+        gui.run()
+    elif choice == "3":
+        from gui_3d import ChessGui3D  # Create this file for Ursina 3D
+        gui = ChessGui3D(engine, mode='3d')
+        gui.run()
+    else:
+        print("Invalid choice, defaulting to CLI.")
+        run_cli_mode(engine)
+
+def run_cli_mode(engine):
     ui = CLIManager(engine)
-    view_mode = "CLI"
-
     while True:
         ui.clear_screen()
         ui.draw_board()
@@ -22,33 +43,17 @@ def main():
             break
 
         move_str = ui.get_user_input()
-
         if move_str == "q":
-            print("Thanks for playing!")
             break
 
         coords = ui.parse_coordinates(move_str)
-
         if coords:
             start, end = coords
-            # Try to make the move
-            piece = engine.board.grid[start[0]][start[1]]
-            promotion_choice = "Queen"
-            if piece and piece.name == "Pawn" and (end[0] == 0 or end[0] == 7):
-                promotion_choice = input("Promote to (Q/R/B/N): ").upper()
-                mapping = {"Q": "Queen", "R": "Rook", "B": "Bishop", "N": "Knight"}
-                promotion_choice = mapping.get(promotion_choice, "Queen")
             success = engine.make_move(start, end)
             if not success:
                 input("Invalid move! Press Enter to try again...")
         else:
             input("Format error (use e2e4)! Press Enter to try again...")
-
-    def handle_click(self, x, y):
-        if self.engine.is_legal(start, end):
-            self.engine.make_move(start, end)
-            self.redraw_board()
-
 
 if __name__ == "__main__":
     main()
